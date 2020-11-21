@@ -5,11 +5,8 @@ services:
     image: hastepad:0.6
     ports:
       - 7777:7777
-    volumes:
-      - type: tmpfs
-        target: /usr/src/app/data
-        tmpfs:
-          size: 128M
+    tmpfs:
+      - /usr/src/app/data:mode=770,size=128m,uid=1000,gid=1000
     logging:
       driver: "json-file"
       options:
