@@ -2,14 +2,15 @@
 
 	<head>
 
-		<title>hastebin</title>
+		<title>hastepad</title>
 		<meta charset="utf-8" />
 		<link rel="stylesheet" type="text/css" href="solarized_dark.css"/>
 		<link rel="stylesheet" type="text/css" href="application.css"/>
 
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="jquery.min.js"></script>
 		<script type="text/javascript" src="highlight.min.js"></script>
 		<script type="text/javascript" src="application.min.js"></script>
+		<script type="text/javascript" src="env"></script>
 
 		<meta name="robots" content="noindex,nofollow"/>
 
@@ -31,7 +32,7 @@
 			}, 1000);
 			// Construct app and load initial path
 			$(function() {
-				app = new haste('hastebin', { twitter: true });
+				app = new haste('hastepad', { twitter: true });
 				app.autosave();
 				handlePop({ target: window });
 			});

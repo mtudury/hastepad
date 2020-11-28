@@ -81,6 +81,10 @@ textarea {
 	height: 42px;
 }
 
+#box1 a.logo_save {
+	background-position: 0 bottom;
+}
+
 #box1 a.logo:hover {
 	background-position: 0 bottom;
 }

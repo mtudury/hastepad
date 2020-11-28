@@ -1,9 +1,9 @@
 # TestNow
 
-Test it in seconds : 
+Test it now : 
 
 ```bash
-docker run --rm -d -p 7777:7777 mtudury/hastepad:0.6
+docker run --rm -d -p 7777:7777 mtudury/hastepad:0.7
 ```
 Open your browser and type url : http://127.0.0.1:7777/
 
