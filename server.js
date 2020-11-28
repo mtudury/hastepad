@@ -99,6 +99,8 @@ var documentHandler = new DocumentHandler({
   keyGenerator: keyGenerator
 });
 
+var clientconf = JSON.stringify({ allowList: config.storage.allowList, allowDelete: config.storage.allowDelete });
+
 var app = connect();
 
 // Rate limit all requests
@@ -154,6 +156,11 @@ app.use(route(function(router) {
   router.get('/key', function(request, response) {
     return documentHandler.handleGetKey(request, response, config);
   });
+
+  router.get('/env', function(request, response) {
+    response.writeHead(200, { 'content-type': 'text/javascript' });
+    response.end("var config = '" + clientconf +"';");
+  })
 }));
 
 // Otherwise, try to match static files

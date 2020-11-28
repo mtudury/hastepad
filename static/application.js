@@ -60,19 +60,22 @@ haste_document.prototype.save = function(key, data, callback) {
   }
   this.data = data;
   var _this = this;
+  $('.logo').addClass('logo_save');
+  window.setTimeout(function() { $('.logo').removeClass('logo_save'); }, 300);
   $.ajax('/documents/' + key, {
     type: 'post',
     data: data,
     dataType: 'json',
     contentType: 'text/plain; charset=utf-8',
-    success: function(res) {
+    success: function(res, statustxt, xhr) {
       _this.key = res.key;
       var high = hljs.highlightAuto(data);
       callback(null, {
         value: high.value,
         key: res.key,
         language: high.language,
-        lineCount: data.split('\n').length
+        lineCount: data.split('\n').length,
+        statusCode: xhr.status
       });
     },
     error: function(res) {
@@ -336,6 +339,8 @@ haste.prototype.lockDocument = function() {
       _this.$textarea.val('').hide();
       _this.$box.show().focus();
       _this.addLineNumbers(ret.lineCount);
+      if (ret.statusCode == 201)
+        _this.updateList();
     }
   });
 };
@@ -497,6 +502,9 @@ haste.prototype.autosave = function() {
       _this.doc.save(_this.getCurrentKey(), _this.$textarea.val(), function (err, data) {
         if (err) {
           _this.showMessage("Error "+err);
+        } else {
+          if (data.statusCode == 201)
+            _this.updateList();
         }
       });
       _this.doc.changed = false;
