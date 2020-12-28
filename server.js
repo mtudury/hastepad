@@ -159,7 +159,7 @@ app.use(route(function(router) {
 
   router.get('/env', function(request, response) {
     response.writeHead(200, { 'content-type': 'text/javascript' });
-    response.end("var config = '" + clientconf +"';");
+    response.end("var config = " + clientconf +";");
   })
 }));
 

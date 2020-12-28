@@ -42,9 +42,9 @@ if (KEY_LENGTH) config.keyLength = KEY_LENGTH;
 
 if (MAX_LENGTH) config.maxLength = MAX_LENGTH;
 
-if (PORT) config.staticMaxAge = STATIC_MAX_AGE;
+if (STATIC_MAX_AGE) config.staticMaxAge = STATIC_MAX_AGE;
 
-if (PORT) config.ecompressStaticAssets = RECOMPRESS_STATIC_ASSETS;
+if (RECOMPRESS_STATIC_ASSETS) config.recompressStaticAssets = RECOMPRESS_STATIC_ASSETS;
 
 if (LOGGING_LEVEL) config.logging[0].level = LOGGING_LEVEL;
 if (LOGGING_TYPE) config.logging[0].type = LOGGING_TYPE;
