@@ -1,4 +1,4 @@
-/* global $, hljs, window, document */
+/* global $, window, document */
 
 ///// represents a single document
 
@@ -25,26 +25,9 @@ haste_document.prototype.load = function(key, callback, lang) {
       _this.locked = true;
       _this.key = key;
       _this.data = res.data;
-      try {
-        var high;
-        if (lang === 'txt') {
-          high = { value: _this.htmlEscape(res.data) };
-        }
-        else if (lang) {
-          high = hljs.highlight(lang, res.data);
-        }
-        else {
-          high = hljs.highlightAuto(res.data);
-        }
-      } catch(err) {
-        // failed highlight, fall back on auto
-        high = hljs.highlightAuto(res.data);
-      }
       callback({
-        value: high.value,
-        key: key,
-        language: high.language || lang,
-        lineCount: res.data.split('\n').length
+        value: res.data,
+        key: key
       });
     },
     error: function() {
@@ -69,12 +52,9 @@ haste_document.prototype.save = function(key, data, callback) {
     contentType: 'text/plain; charset=utf-8',
     success: function(res, statustxt, xhr) {
       _this.key = res.key;
-      var high = hljs.highlightAuto(data);
       callback(null, {
-        value: high.value,
+        value: res.data,
         key: res.key,
-        language: high.language,
-        lineCount: data.split('\n').length,
         statusCode: xhr.status
       });
     },
@@ -134,22 +114,35 @@ haste_document.prototype.getkey = function(callback) {
 var haste = function(appName, options) {
   this.appName = appName;
   this.$textarea = $('textarea');
-  this.$box = $('#box');
-  this.$code = $('#box code');
-  this.$linenos = $('#linenos');
   this.options = options;
   this.configureShortcuts();
   this.configureButtons();
+  this.showKeys = true;
   // If twitter is disabled, hide the button
   if (!options.twitter) {
     $('#box2 .twitter').hide();
   }
+  _this = this;
+  $('.logo').click(function (e) {
+    e.preventDefault();
+    if (_this.showKeys) {
+      _this.showKeys = false;
+      $('#key').css('height', '40px');
+    } else {
+      _this.showKeys = true;
+      $('#key').css('height', 'auto');
+    }
+  });
 };
 
 // Set the page title - include the appName
 haste.prototype.setTitle = function(ext) {
   var title = ext ? this.appName + ' - ' + ext : this.appName;
   document.title = title;
+};
+
+haste.prototype.updateKeySize = function () {
+  $(".CodeMirror-fullscreen").css("right", $("#key").outerWidth());
 };
 
 // Show a message box
@@ -168,12 +161,46 @@ haste.prototype.lightKey = function() {
 
 // Show the full key
 haste.prototype.fullKey = function() {
-  this.configureKey(['new', 'duplicate', 'edit', 'raw', 'delete']);
+  var keys = ['new', 'duplicate', 'edit', 'raw'];
+  if (config.allowDelete) {
+    keys.push('delete');
+  }
+  this.configureKey(keys);
 };
 
 // Show all the keys
 haste.prototype.allKey = function() {
-  this.configureKey(['new', 'save', 'duplicate', 'edit', 'raw', 'delete']);
+  var keys = ['new', 'save', 'duplicate', 'edit', 'raw'];
+  if (config.allowDelete) {
+    keys.push('delete');
+  }
+  this.configureKey(keys);
+};
+
+haste.prototype.showEditor = function(key) {
+  _this = this;
+  if (!this.editor) {
+    CodeMirror.modeURL = "/mode/%N/%N.js";
+    this.editor = CodeMirror.fromTextArea(this.$textarea[0], {
+      styleActiveLine: true,
+      lineNumbers: true,
+      fullScreen: true,
+      theme: "material",
+      autofocus: true
+    });
+    this.editor.on("changes", function () {
+      //console.log("changed");
+      if (_this.doc)
+        _this.doc.changed = true;
+    });
+    this.updateKeySize();
+  }
+
+  if (m = /.+\.([^.]+)$/.exec(key)) {
+    mode = CodeMirror.findModeByExtension(m[1]);
+    CodeMirror.autoLoadMode(this.editor, mode.mode);
+    this.editor.setOption("mode", mode.mime);
+  }
 };
 
 // Set the key up for certain things to be enabled
@@ -205,6 +232,8 @@ haste.prototype.getCurrentKey = function () {
 // Get this document from the server and lock it here
 haste.prototype.getList = function(callback) {
   var _this = this;
+  if (!config.allowList)
+    return;
   $.ajax('/documents/', {
     type: 'get',
     dataType: 'json',
@@ -225,14 +254,14 @@ haste.prototype.newDocument = function(forcenewkey, callback) {
   var key = this.getCurrentKey();
   var newdoc = function(key) {
     window.history.pushState(null, _this.appName, '/'+key);
-    _this.$box.hide();
     _this.doc = new haste_document();
     _this.setTitle();
     _this.lightKey();
-    _this.$textarea.val('').show('fast', function() {
-      this.focus();
-    });
-    _this.removeLineNumbers();
+    _this.showEditor(key);
+    _this.editor.setValue('');
+    _this.editor.setOption('readOnly', false);
+    _this.editor.setOption("cursorBlinkRate", 530);
+    _this.editor.focus();
     if (callback) {
       callback(_this.doc);
     }
@@ -247,69 +276,23 @@ haste.prototype.newDocument = function(forcenewkey, callback) {
   _this.updateList();
 };
 
-// Map of common extensions
-// Note: this list does not need to include anything that IS its extension,
-// due to the behavior of lookupTypeByExtension and lookupExtensionByType
-// Note: optimized for lookupTypeByExtension
-haste.extensionMap = {
-  rb: 'ruby', py: 'python', pl: 'perl', php: 'php', scala: 'scala', go: 'go',
-  xml: 'xml', html: 'xml', htm: 'xml', css: 'css', js: 'javascript', vbs: 'vbscript',
-  lua: 'lua', pas: 'delphi', java: 'java', cpp: 'cpp', cc: 'cpp', m: 'objectivec',
-  vala: 'vala', sql: 'sql', sm: 'smalltalk', lisp: 'lisp', ini: 'ini',
-  diff: 'diff', bash: 'bash', sh: 'bash', tex: 'tex', erl: 'erlang', hs: 'haskell',
-  md: 'markdown', txt: '', coffee: 'coffee', swift: 'swift'
-};
-
-// Look up the extension preferred for a type
-// If not found, return the type itself - which we'll place as the extension
-haste.prototype.lookupExtensionByType = function(type) {
-  for (var key in haste.extensionMap) {
-    if (haste.extensionMap[key] === type) return key;
-  }
-  return type;
-};
-
-// Look up the type for a given extension
-// If not found, return the extension - which we'll attempt to use as the type
-haste.prototype.lookupTypeByExtension = function(ext) {
-  return haste.extensionMap[ext] || ext;
-};
-
-// Add line numbers to the document
-// For the specified number of lines
-haste.prototype.addLineNumbers = function(lineCount) {
-  var h = '';
-  for (var i = 0; i < lineCount; i++) {
-    h += (i + 1).toString() + '<br/>';
-  }
-  $('#linenos').html(h);
-};
-
-// Remove the line numbers
-haste.prototype.removeLineNumbers = function() {
-  $('#linenos').html('&gt;');
-};
-
 // Load a document and show it
 haste.prototype.loadDocument = function(key) {
-  // Split the key up
-  var parts = key.split('.', 2);
-  // Ask for what we want
   var _this = this;
   _this.doc = new haste_document();
   _this.doc.load(key, function(ret) {
     if (ret) {
-      _this.$code.html(ret.value);
+      _this.showEditor(key);
+      _this.editor.setValue(ret.value);
       _this.setTitle(ret.key);
       _this.fullKey();
-      _this.$textarea.val('').hide();
-      _this.$box.show().focus();
-      _this.addLineNumbers(ret.lineCount);
+      _this.editor.setOption("readOnly", true);
+      _this.editor.setOption("cursorBlinkRate", -1);
     }
     else {
       _this.newDocument();
     }
-  }, this.lookupTypeByExtension(parts[1]));
+  });
   this.updateList();
 };
 
@@ -319,7 +302,7 @@ haste.prototype.duplicateDocument = function() {
   if (_this.doc.locked) {
     var currentData = _this.doc.data;
     _this.newDocument(true, function () {
-      _this.$textarea.val(currentData);
+      _this.editor.setValue(currentData);
     });
   }
 };
@@ -327,18 +310,15 @@ haste.prototype.duplicateDocument = function() {
 // Lock the current document
 haste.prototype.lockDocument = function() {
   var _this = this;
-  this.doc.save(this.getCurrentKey(), this.$textarea.val(), function(err, ret) {
+  this.doc.save(this.getCurrentKey(), this.editor.getValue(), function(err, ret) {
     if (err) {
       _this.showMessage(err.message, 'error');
     }
     else if (ret) {
       _this.doc.locked = true;
-      _this.$code.html(ret.value);
-      _this.setTitle(ret.key);
+      _this.editor.setOption("readOnly", true);
+      _this.editor.setOption("cursorBlinkRate", -1);
       _this.fullKey();
-      _this.$textarea.val('').hide();
-      _this.$box.show().focus();
-      _this.addLineNumbers(ret.lineCount);
       if (ret.statusCode == 201)
         _this.updateList();
     }
@@ -348,11 +328,12 @@ haste.prototype.lockDocument = function() {
 // UnLock the current document
 haste.prototype.unlockDocument = function() {
   var _this = this;
-  _this.$textarea.val(_this.$code.text()).show().focus();
-  _this.$box.hide();
-  _this.lightKey();
-  _this.removeLineNumbers();
+  //todo set code mirror writable
   _this.doc.locked = false;
+  _this.editor.setOption("readOnly", false);
+  _this.editor.setOption("cursorBlinkRate", 530);
+  _this.editor.focus();
+  _this.lightKey();
 };
 
 haste.prototype.configureButtons = function() {
@@ -366,7 +347,7 @@ haste.prototype.configureButtons = function() {
         return evt.ctrlKey && (evt.keyCode === 83);
       },
       action: function() {
-        if (_this.$textarea.val().replace(/^\s+|\s+$/g, '') !== '') {
+        if (_this.editor.getValue().replace(/^\s+|\s+$/g, '') !== '') {
           _this.lockDocument();
         }
       }
@@ -424,11 +405,13 @@ haste.prototype.configureButtons = function() {
       shortcutDescription: 'none',
       action: function() {
         _this.doc.deleteDocument(_this.getCurrentKey(), function () { 
-          _this.$box.html('');
-          _this.removeLineNumbers();
+          _this.editor.setValue('');
           _this.showMessage("Deleted");
           _this.updateList();
         });
+      },
+      shown: function() {
+        return config.allowDelete;
       }
     }
   ];
@@ -438,6 +421,9 @@ haste.prototype.configureButtons = function() {
 };
 
 haste.prototype.configureButton = function(options) {
+  if (options.shown && !options.shown()) {
+    options.$where.hide();
+  }
   // Handle the click action
   options.$where.click(function(evt) {
     evt.preventDefault();
@@ -471,6 +457,7 @@ haste.prototype.updateList = function () {
         cnt++;
       });
       $('#list').html(lis);
+      _this.updateKeySize();
     }
   });
 };
@@ -493,13 +480,9 @@ haste.prototype.configureShortcuts = function() {
 
 haste.prototype.autosave = function() {
   var _this = this;
-  _this.$textarea.on('keydown', function () {
-    _this.doc.changed = true;
-  });
-
   var cycle = function () {
     if ((_this.doc)&&(!_this.doc.locked)&&(_this.doc.changed)) {
-      _this.doc.save(_this.getCurrentKey(), _this.$textarea.val(), function (err, data) {
+      _this.doc.save(_this.getCurrentKey(), _this.editor.getValue(), function (err, data) {
         if (err) {
           _this.showMessage("Error "+err);
         } else {

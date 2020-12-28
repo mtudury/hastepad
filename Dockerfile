@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN mv config.json base.config.json && touch config.json && chown node:node config.json ./static/application.min.js && mkdir data && chown node:node data
+RUN rm config.json && touch config.json && chown node:node config.json ./static/*.min.js && mkdir data && chown node:node data
 
 RUN npm install 
 # && \

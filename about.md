@@ -17,8 +17,13 @@ This version is customized in order to add/change some features :
 - Live saving : Do not loose your work when closing your browser
 - List document
 - Delete document
+- Choose filename : Simply type it in the url (Filename extension will allow syntax highlighting)
 
-It main usage would be like a notepad online (mono user)
+It main usage would be like a notepad online
+
+The concurency limit is : One user per document at the same time.
+
+You can self host it easily using docker : image is hosted here : https://hub.docker.com/r/mtudury/hastepad
 
 ## Basic Usage
 
@@ -32,6 +37,10 @@ To make a new entry, click "New" (or type 'control + n')
 Most of the time I want to show you some text, it's coming from my current
 console session.  We should make it really easy to take code from the console
 and send it to people.
+
+You Have to customise this (urls) : then put it in .bashrc :
+`haste() { host="http://my.selfhosted.haste"; a=$(cat); curl -X POST -s -d "$a" ${host}/documents | awk -F '"' '{print "'${host}'/"$4}'; }`
+then
 
 `cat something | haste` # https://hastebin.com/1238193
 

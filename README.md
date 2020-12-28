@@ -3,7 +3,7 @@
 Test it now : 
 
 ```bash
-docker run --rm -d -p 7777:7777 mtudury/hastepad:0.7
+docker run --rm -d -p 7777:7777 mtudury/hastepad:latest
 ```
 Open your browser and type url : http://127.0.0.1:7777/
 
@@ -27,6 +27,9 @@ to do things like:
 
 `cat something | haste`
 
+nota : a lightweight bash exist : 
+`haste() { host="http://my.selfhosted.haste"; a=$(cat); curl -X POST -s -d "$a" ${host}/documents | awk -F '"' '{print "'${host}'/"$4}'; }`
+
 which will output a URL to share containing the contents of `cat something`'s
 STDOUT.  Check the README there for more details and usages.
 
@@ -41,10 +44,13 @@ This version is customized in order to add/change some features :
 - Live saving : Do not loose your work when closing your browser
 - List documents
 - Delete document
+- Choose filename : Simply type it in the url (Filename extension will allow syntax highlighting)
 
 It currently only works with storage type : file.
 
-It main usage would be like a notepad online (mono user)
+It main usage would be like a notepad online
+
+The concurency limit is : One user per document at the same time.
 
 It does not have exactly the same purpose of original haste (no edit/no delete needed nor wanted in original version) so choose accordingly to your needs
 
