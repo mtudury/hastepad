@@ -128,9 +128,11 @@ var haste = function(appName, options) {
     if (_this.showKeys) {
       _this.showKeys = false;
       $('#key').css('height', '40px');
+      _this.updateKeySize();
     } else {
       _this.showKeys = true;
       $('#key').css('height', 'auto');
+      _this.updateKeySize();
     }
   });
 };
@@ -142,7 +144,11 @@ haste.prototype.setTitle = function(ext) {
 };
 
 haste.prototype.updateKeySize = function () {
-  $(".CodeMirror-fullscreen").css("right", $("#key").outerWidth());
+  if (this.showKeys) {
+    $(".CodeMirror-fullscreen").css("right", $("#key").outerWidth());
+  } else {
+    $(".CodeMirror-fullscreen").css("right", '0');
+  }
 };
 
 // Show a message box
@@ -189,9 +195,10 @@ haste.prototype.showEditor = function(key) {
       autofocus: true
     });
     this.editor.on("changes", function () {
-      //console.log("changed");
-      if (_this.doc)
+      if (_this.doc) {
+        if (_this.editor.getValue().replace(/^\s+|\s+$/g, '') !== '')
         _this.doc.changed = true;
+      }
     });
     this.updateKeySize();
   }
