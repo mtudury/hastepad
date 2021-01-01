@@ -4,6 +4,7 @@
   "port": 7777,
 
   "keyLength": 12,
+  "keyDefaultExtension": ".txt",
 
   "maxLength": 4000000,
 
