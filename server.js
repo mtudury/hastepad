@@ -96,7 +96,8 @@ var documentHandler = new DocumentHandler({
   store: preferredStore,
   maxLength: config.maxLength,
   keyLength: config.keyLength,
-  keyGenerator: keyGenerator
+  keyGenerator: keyGenerator,
+  keyDefaultExtension: config.keyDefaultExtension
 });
 
 var clientconf = JSON.stringify({ allowList: config.storage.allowList, allowDelete: config.storage.allowDelete });

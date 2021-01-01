@@ -2,6 +2,7 @@ const {
   HOST,
   PORT,
   KEY_LENGTH,
+  KEY_DEFAULT_EXTENSION,
   MAX_LENGTH,
   STATIC_MAX_AGE,
   RECOMPRESS_STATIC_ASSETS,
@@ -30,7 +31,7 @@ const {
   RATE_LIMITS_BLACKLIST,
   DOCUMENTS,
   STORAGE_ALLOWLIST,
-  STORAGE_ALLOWDELETE
+  STORAGE_ALLOWDELETE,
 } = process.env;
 
 const config = require("./base.config.json");
@@ -39,6 +40,7 @@ if (HOST) config.host = HOST;
 if (PORT) config.port = PORT;
 
 if (KEY_LENGTH) config.keyLength = KEY_LENGTH;
+if (KEY_DEFAULT_EXTENSION) config.keyDefaultExtension = KEY_DEFAULT_EXTENSION;
 
 if (MAX_LENGTH) config.maxLength = MAX_LENGTH;
 
