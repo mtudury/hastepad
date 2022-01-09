@@ -186,7 +186,7 @@ haste.prototype.allKey = function() {
 haste.prototype.showEditor = function(key) {
   _this = this;
   if (!this.editor) {
-    CodeMirror.modeURL = "/mode/%N/%N.js";
+    /*CodeMirror.modeURL = "/mode/%N/%N.js";
     this.editor = CodeMirror.fromTextArea(this.$textarea[0], {
       styleActiveLine: true,
       lineNumbers: true,
@@ -199,14 +199,24 @@ haste.prototype.showEditor = function(key) {
         if (_this.editor.getValue().replace(/^\s+|\s+$/g, '') !== '')
         _this.doc.changed = true;
       }
+    });*/
+    this.editor = monaco.editor.create(document.getElementById('container'), {
+      value: "// First line\nfunction hello() {\n\talert('Hello world!');\n}\n// Last line",
+      language: 'javascript',
+    
+      lineNumbers: 'on',
+      roundedSelection: false,
+      scrollBeyondLastLine: false,
+      readOnly: false,
+      theme: 'vs-dark'
     });
     this.updateKeySize();
   }
 
   if (m = /.+\.([^.]+)$/.exec(key)) {
-    mode = CodeMirror.findModeByExtension(m[1]);
-    CodeMirror.autoLoadMode(this.editor, mode.mode);
-    this.editor.setOption("mode", mode.mime);
+    //mode = CodeMirror.findModeByExtension(m[1]);
+    //CodeMirror.autoLoadMode(this.editor, mode.mode);
+    //this.editor.setOption("mode", mode.mime);
   }
 };
 
@@ -265,10 +275,10 @@ haste.prototype.newDocument = function(forcenewkey, callback) {
     _this.setTitle();
     _this.lightKey();
     _this.showEditor(key);
-    _this.editor.setValue('');
-    _this.editor.setOption('readOnly', false);
-    _this.editor.setOption("cursorBlinkRate", 530);
-    _this.editor.focus();
+    // _this.editor.setValue('');
+    // _this.editor.setOption('readOnly', false);
+    // _this.editor.setOption("cursorBlinkRate", 530);
+    // _this.editor.focus();
     if (callback) {
       callback(_this.doc);
     }

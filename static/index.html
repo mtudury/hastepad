@@ -4,19 +4,18 @@
 
 		<title>hastepad</title>
 		<meta charset="utf-8" />
-		<link rel="stylesheet" type="text/css" href="solarized_dark.css"/>
 		<link rel="stylesheet" type="text/css" href="application.css"/>
-		<link rel="stylesheet" type="text/css" href="codemirror.css"/>
-		<link rel="stylesheet" type="text/css" href="fullscreen.css"/>
-		<link rel="stylesheet" type="text/css" href="material.css"/>
+		<link rel="stylesheet" type="text/css" href="monaco/vs/editor/editor.main.css"></script>
 
 
-		<script type="text/javascript" src="codemirror.min.js"></script>
-		<script type="text/javascript" src="fullscreen.min.js"></script>
-		<script type="text/javascript" src="loadmode.min.js"></script>
 		<script type="text/javascript" src="jquery.min.js"></script>
-		<script type="text/javascript" src="application.min.js"></script>
-		<script type="text/javascript" src="mode/meta.js"></script>
+		<script type="text/javascript" src="application.js"></script>
+		<script>
+			var require = { paths: { vs: 'monaco/vs' } };
+		</script>
+		<script src="monaco/vs/loader.js"></script>
+		<script src="monaco/vs/editor/editor.main.nls.js"></script>
+		<script src="monaco/vs/editor/editor.main.js"></script>
 		<script type="text/javascript" src="env"></script>
 
 		<meta name="robots" content="noindex,nofollow"/>
@@ -72,7 +71,7 @@
 			</div>
 		</div>
 
-		<textarea spellcheck="false" style="display:none;"></textarea>
+		<div id="container"></div>
 
 	</body>
 

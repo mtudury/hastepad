@@ -1,6 +1,5 @@
 body {
 	background: #263238;
-	padding: 20px 50px;
 	margin: 0px;
 	scrollbar-width: thin;
 }
@@ -25,25 +24,17 @@ body {
 
 /* textarea */
 
-textarea {
-	background: transparent;
-	border: 0px;
-	color: #fff;
-	padding: 0px;
-	width: 100%;
-	height: 100%;
-	font-family: monospace;
-	outline: none;
-	resize: none;
-	font-size: 13px;
-	margin-top: 0;
-	margin-bottom: 0;
+#container {
+	position: fixed;
+	top: 0; left: 0; right: 202px; bottom: 0;
+	height: auto;
+	z-index: 9;
 }
 
 /* the line numbers */
 
 #linenos {
-  color: #7d7d7d;
+  	color: #7d7d7d;
 	z-index: -1000;
 	position: absolute;
 	top: 20px;
@@ -64,7 +55,7 @@ textarea {
 	border: 0px;
 	outline: none;
 	font-size: 13px;
-  overflow: inherit;
+  	overflow: inherit;
 }
 
 #box code {
