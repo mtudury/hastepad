@@ -1,3 +1,5 @@
+v0.9 : Editor migrated to Monaco-editor
+
 v0.8.2 : default key extension customisable
 
 v0.8.1 : fix fullscreen mode scrollbar, default extension txt
