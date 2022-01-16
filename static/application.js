@@ -184,7 +184,8 @@ haste.prototype.allKey = function() {
 };
 
 haste.prototype.setReadOnly = function (ro) {
-  this.editor.EditorOptions.readOnly = ro;
+  if (this.editor)
+    this.editor.updateOptions({readOnly: ro});
 };
 
 haste.prototype.showEditor = function(key) {
@@ -193,6 +194,7 @@ haste.prototype.showEditor = function(key) {
     this.editor = monaco.editor.create(document.getElementById('container'), {
       model: monaco.editor.createModel(_this.doc?_this.doc.data:'', undefined, monaco.Uri.file(key)),
     
+      automaticLayout: true,
       lineNumbers: 'on',
       roundedSelection: false,
       scrollBeyondLastLine: false,
@@ -206,12 +208,8 @@ haste.prototype.showEditor = function(key) {
       }
     });
     this.updateKeySize();
-  }
-
-  if (m = /.+\.([^.]+)$/.exec(key)) {
-    //mode = CodeMirror.findModeByExtension(m[1]);
-    //CodeMirror.autoLoadMode(this.editor, mode.mode);
-    //this.editor.setOption("mode", mode.mime);
+  } else {
+    this.editor.setModel(monaco.editor.createModel(_this.doc?_this.doc.data:'', undefined, monaco.Uri.file(key)));
   }
 };
 
@@ -270,8 +268,8 @@ haste.prototype.newDocument = function(forcenewkey, callback) {
     _this.setTitle();
     _this.lightKey();
     _this.showEditor(key);
-    // _this.editor.setOption("cursorBlinkRate", 530);
     _this.editor.focus();
+    _this.setReadOnly(false);
     if (callback) {
       callback(_this.doc);
     }
@@ -336,7 +334,6 @@ haste.prototype.lockDocument = function() {
 // UnLock the current document
 haste.prototype.unlockDocument = function() {
   var _this = this;
-  //todo set code mirror writable
   _this.doc.locked = false;
   _this.setReadOnly(false);
   _this.editor.focus();
