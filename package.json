@@ -17,6 +17,7 @@
     "connect": "^3.7.0",
     "connect-ratelimit": "0.0.7",
     "connect-route": "0.1.5",
+    "monaco-editor": "^0.31.1",
     "pg": "^8.0.0",
     "redis": "0.8.1",
     "redis-url": "0.1.0",

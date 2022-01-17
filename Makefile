@@ -1,0 +1,3 @@
+default:
+	docker-compose build
+

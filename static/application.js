@@ -145,9 +145,9 @@ haste.prototype.setTitle = function(ext) {
 
 haste.prototype.updateKeySize = function () {
   if (this.showKeys) {
-    $(".CodeMirror-fullscreen").css("right", $("#key").outerWidth());
+    $("#container").css("right", $("#key").outerWidth());
   } else {
-    $(".CodeMirror-fullscreen").css("right", '0');
+    $("#container").css("right", '0');
   }
 };
 
@@ -183,30 +183,33 @@ haste.prototype.allKey = function() {
   this.configureKey(keys);
 };
 
+haste.prototype.setReadOnly = function (ro) {
+  if (this.editor)
+    this.editor.updateOptions({readOnly: ro});
+};
+
 haste.prototype.showEditor = function(key) {
   _this = this;
   if (!this.editor) {
-    CodeMirror.modeURL = "/mode/%N/%N.js";
-    this.editor = CodeMirror.fromTextArea(this.$textarea[0], {
-      styleActiveLine: true,
-      lineNumbers: true,
-      fullScreen: true,
-      theme: "material",
-      autofocus: true
+    this.editor = monaco.editor.create(document.getElementById('container'), {
+      model: monaco.editor.createModel(_this.doc?_this.doc.data:'', undefined, monaco.Uri.file(key)),
+    
+      automaticLayout: true,
+      lineNumbers: 'on',
+      roundedSelection: false,
+      scrollBeyondLastLine: false,
+      readOnly: _this.doc.locked,
+      theme: 'vs-dark'
     });
-    this.editor.on("changes", function () {
+    this.editor.onDidChangeModelContent(function (e) {
       if (_this.doc) {
         if (_this.editor.getValue().replace(/^\s+|\s+$/g, '') !== '')
-        _this.doc.changed = true;
+          _this.doc.changed = true;
       }
     });
     this.updateKeySize();
-  }
-
-  if (m = /.+\.([^.]+)$/.exec(key)) {
-    mode = CodeMirror.findModeByExtension(m[1]);
-    CodeMirror.autoLoadMode(this.editor, mode.mode);
-    this.editor.setOption("mode", mode.mime);
+  } else {
+    this.editor.setModel(monaco.editor.createModel(_this.doc?_this.doc.data:'', undefined, monaco.Uri.file(key)));
   }
 };
 
@@ -265,10 +268,8 @@ haste.prototype.newDocument = function(forcenewkey, callback) {
     _this.setTitle();
     _this.lightKey();
     _this.showEditor(key);
-    _this.editor.setValue('');
-    _this.editor.setOption('readOnly', false);
-    _this.editor.setOption("cursorBlinkRate", 530);
     _this.editor.focus();
+    _this.setReadOnly(false);
     if (callback) {
       callback(_this.doc);
     }
@@ -293,8 +294,7 @@ haste.prototype.loadDocument = function(key) {
       _this.editor.setValue(ret.value);
       _this.setTitle(ret.key);
       _this.fullKey();
-      _this.editor.setOption("readOnly", true);
-      _this.editor.setOption("cursorBlinkRate", -1);
+      _this.setReadOnly(true);
     }
     else {
       _this.newDocument();
@@ -323,8 +323,7 @@ haste.prototype.lockDocument = function() {
     }
     else if (ret) {
       _this.doc.locked = true;
-      _this.editor.setOption("readOnly", true);
-      _this.editor.setOption("cursorBlinkRate", -1);
+      _this.setReadOnly(true);
       _this.fullKey();
       if (ret.statusCode == 201)
         _this.updateList();
@@ -335,10 +334,8 @@ haste.prototype.lockDocument = function() {
 // UnLock the current document
 haste.prototype.unlockDocument = function() {
   var _this = this;
-  //todo set code mirror writable
   _this.doc.locked = false;
-  _this.editor.setOption("readOnly", false);
-  _this.editor.setOption("cursorBlinkRate", 530);
+  _this.setReadOnly(false);
   _this.editor.focus();
   _this.lightKey();
 };
