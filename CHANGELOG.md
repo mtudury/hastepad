@@ -1,3 +1,5 @@
+v0.9.1 : Fix : Message when connection to server is lost while saving
+
 v0.9 : Editor migrated to Monaco-editor
 
 v0.8.2 : default key extension customisable
