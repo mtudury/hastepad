@@ -57,8 +57,10 @@ haste_document.prototype.save = function(key, data, callback) {
         key: res.key,
         statusCode: xhr.status
       });
+      $('#box1').removeClass('errorsave');
     },
     error: function(res) {
+      $('#box1').addClass('errorsave');
       try {
         callback($.parseJSON(res.responseText));
       }
@@ -193,7 +195,7 @@ haste.prototype.showEditor = function(key) {
   if (!this.editor) {
     this.editor = monaco.editor.create(document.getElementById('container'), {
       model: monaco.editor.createModel(_this.doc?_this.doc.data:'', undefined, monaco.Uri.file(key)),
-    
+
       automaticLayout: true,
       lineNumbers: 'on',
       roundedSelection: false,
@@ -408,7 +410,7 @@ haste.prototype.configureButtons = function() {
       },
       shortcutDescription: 'none',
       action: function() {
-        _this.doc.deleteDocument(_this.getCurrentKey(), function () { 
+        _this.doc.deleteDocument(_this.getCurrentKey(), function () {
           _this.editor.setValue('');
           _this.showMessage("Deleted");
           _this.updateList();
@@ -488,7 +490,11 @@ haste.prototype.autosave = function() {
     if ((_this.doc)&&(!_this.doc.locked)&&(_this.doc.changed)) {
       _this.doc.save(_this.getCurrentKey(), _this.editor.getValue(), function (err, data) {
         if (err) {
-          _this.showMessage("Error "+err);
+          if (err.message) {
+            _this.showMessage("Error "+err.message);
+          } else {
+            _this.showMessage("Error "+err);
+          }
         } else {
           if (data.statusCode == 201)
             _this.updateList();
@@ -496,7 +502,7 @@ haste.prototype.autosave = function() {
       });
       _this.doc.changed = false;
     }
-    window.setTimeout(cycle, 5000);  
+    window.setTimeout(cycle, 5000);
   };
 
   window.setTimeout(cycle, 5000);

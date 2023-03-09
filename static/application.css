@@ -96,6 +96,10 @@ body {
 	background-position: 0 bottom;
 }
 
+#box1.errorsave {
+	background-color: red;
+}
+
 #box1 a.logo:hover {
 	background-position: 0 bottom;
 }
@@ -197,12 +201,13 @@ body {
 #box2 .button-picture{ border-width: 0; font-size: inherit; }
 
 #messages {
-	position:fixed;
+	position: absolute;
 	top:0px;
 	right:138px;
 	margin:0;
 	padding:0;
 	width:400px;
+	z-index: 10
 }
 
 #messages li {
